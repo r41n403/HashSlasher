@@ -130,10 +130,17 @@ resource "aws_iam_policy" "hasher-put-policy" {
   policy = data.aws_iam_policy_document.hasher-put-document.json
 }
 
-#Create IAM Policy attachment
+#Create IAM Policy attachment for dynamo put
 resource "aws_iam_role_policy_attachment" "attachment" {
   role = aws_iam_role.HasherRole.name
   policy_arn = aws_iam_policy.hasher-put-policy.arn
+  
+}
+
+#Create IAM policy attachment for lambda cloudwatch logs
+resource "aws_iam_role_policy_attachment" "attachment-logs" {
+  role = aws_iam_role.HasherRole.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
   
 }
 
@@ -143,7 +150,7 @@ resource "aws_lambda_function" "Hasher" {
   filename = "${data.archive_file.code_zip.output_path}"
   function_name = "Hasher"
   role = aws_iam_role.HasherRole.arn
-  handler = "lambda_function.lambda_handler"
+  handler = "PlaintextToMD5Lambda.lambda_handler"
   runtime = "python3.12"
 }
 
